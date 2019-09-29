@@ -86,21 +86,24 @@ $(function () {
   function renderReviews() {
     $('.showreviews').click(function (event) {
       const placeId = this.dataset.placeid;
-      console.log('clicked')
-      $.ajax({
-        url: `http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`,
-        type: 'GET',
-        contentType: 'application/json',
-        dataType: 'JSON',
-        success: function (data) {
-          console.log(data);
-          const remover = `.reviewitems #${placeId} > li`;
-          const adder = `.reviewitems #${placeId}`;
-          $(remover).remove();
-          $(`.reviewitems #${placeId}`).append(createReviewHTML(data));
-          return (createReviewHTML(data))
-        }
-      });
+      console.log($(`.${placeId}`).text())
+      if ($(`.${placeId}`).text() === 'hide') {
+        $(`.${placeId}`).text('show')
+        $(`#${placeId} > li`).remove();
+      } else {
+        $(`.${placeId}`).text('hide')
+        $.ajax({
+          url: `http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`,
+          type: 'GET',
+          contentType: 'application/json',
+          dataType: 'JSON',
+          success: function (data) {
+            let toggled = true;
+            $(`#${placeId} > li`).remove();
+            $(`#${placeId}`).append(createReviewHTML(data));
+          }
+        })
+      };
     });
   }
   function createHTML (place) {
@@ -155,23 +158,43 @@ $(function () {
       </div>
       <div class="reviews">
         <h2>Reviews</h2>
-        <span data-placeid=${place.id} class="showreviews">show</span>
-        <ul class="reviewitems" id="${place.id}">
-        </ul>
+        <span data-placeid=${place.id} class="showreviews ${place.id}">show</span>
+          <ul class="reviewitems" id="${place.id}">
+          </ul>
        </div>
       </article>`);
   }
-  function createReviewHTML(data) {
-    const retHtmlList = []
-    data.forEach(review => {
-      retHtmlList.push(
-        `<li>
-            <h3>From ${review.name} on ${review.created_at}</h3>
-          <p>${review.text}</p>
-        </li>`
-      )
+  function getUserName(review, userId) {
+    $.ajax({
+      url: `http://0.0.0.0:5001/api/v1/users/${userId}`,
+      type: 'GET',
+      contentType: 'application/json',
+      dataType: 'JSON',
+      success: function (data) {
+        const fullName = `${data.first_name} ${data.last_name}`
+        console.log(fullName)
+        return (generateReview(review, fullName))
+      }
     })
-    let retHTML = retHtmlList.join('');
-    return(retHTML);
+  }
+
+  function generateReview (review, fullName) {
+    return (
+      `<li>
+          <h3>From ${fullName} on ${review.created_at}</h3>
+        <p>${review.text}</p>
+      </li>`
+    )
+  }
+
+  function createReviewHTML (data) {
+    const retHtmlList = []
+    console.log(data)
+    data.forEach(review => {
+      retHtmlList.push(getUserName(review, review.user_id))
+      console.log('1')
+    })
+    const retHTML = retHtmlList.join('');
+    return (retHTML);
   }
 });
