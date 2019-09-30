@@ -101,7 +101,7 @@ $(function () {
       .then((res) => res.json())
       .then((data) => `${data.first_name} ${data.last_name}`)
       .then((fullName) => generateReview(review, fullName))
-      .then((genReview) => ($(`#${review.place_id}`).append(review)))
+      .then((genReview) => ($(`#${review.place_id}`).append(genReview)))
   }
   
   function renderReviews () {
