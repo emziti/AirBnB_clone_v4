@@ -15,18 +15,18 @@ $(function () {
       type: 'POST',
       contentType: 'application/json',
       dataType: 'JSON',
-      data: JSON.stringify({amenities: Object.keys(amenityIds)}),
+      data: JSON.stringify({ amenities: Object.keys(amenityIds) }),
       success: function (data) {
         let i;
-        let newHTML = []
+        let newHTML = [];
         for (i = 0; i < data.length; i++) {
           newHTML.push(createHTML(data[i]));
         }
         newHTML = newHTML.join('');
-        $('section.places > article').remove()
+        $('section.places > article').remove();
         $('section.places').append(newHTML);
       }
-    })
+    });
   });
   $.ajax({
     url: 'http://0.0.0.0:5001/api/v1/status/',
@@ -104,4 +104,4 @@ $(function () {
 
       </article>`);
   }
-})
+});

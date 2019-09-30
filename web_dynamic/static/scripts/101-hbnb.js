@@ -49,8 +49,8 @@ $(function () {
         amenities: Object.keys(amenityIds),
         states: Object.keys(stateIds),
         cities: Object.keys(cityIds)
-      })
-    renderPlaces(filters)
+      });
+    renderPlaces(filters);
   });
 
   $.ajax({
@@ -71,44 +71,44 @@ $(function () {
       .then((data) => `${data.first_name} ${data.last_name}`)
       .then((fullName) => {
         return (
-        `<li>
+        `<li style="list-style-type:none;">
           <h3>From ${fullName} on ${review.created_at}</h3>
           <p>${review.text}</p>
         </li>`
-        )
+        );
       })
-      .then((genReview) => ($(`#${review.place_id}`).append(genReview)))
+      .then((genReview) => ($(`#${review.place_id}`).append(genReview)));
   }
 
   function renderReviews () {
-    $('.showreviews').off('click')
+    $('.showreviews').off('click');
     $('.showreviews').click(function (event) {
       const placeId = this.dataset.placeid;
       if ($(`.${placeId}`).text() === 'hide') {
-        $(`.${placeId}`).text('show')
+        $(`.${placeId}`).text('show');
         $(`#${placeId} > li`).remove();
       } else {
-        $(`.${placeId}`).text('hide')
+        $(`.${placeId}`).text('hide');
         window.fetch(`http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`)
           .then((response) => response.json())
           .then((data) => {
             data.forEach(review => {
-              generateReviewHTML(review)
-            })
-          })
-      };
+              generateReviewHTML(review);
+            });
+          });
+      }
     });
   }
 
-  function renderPlaces (filters='{}') {
-    $('section.places > article').remove()
+  function renderPlaces (filters = '{}') {
+    $('section.places > article').remove();
     const options = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: filters
-    }
+    };
     window.fetch('http://0.0.0.0:5001/api/v1/places_search', options)
       .then((res) => res.json())
       .then((data) => {
@@ -117,7 +117,7 @@ $(function () {
           $('section.places').append(createHTML(data[i]));
         }
       })
-      .then(() => renderReviews())
+      .then(() => renderReviews());
   }
 
   renderPlaces();
@@ -174,7 +174,7 @@ $(function () {
       </div>
       <div class="reviews">
         <h2>Reviews</h2>
-        <span data-placeid=${place.id} class="showreviews ${place.id}">show</span>
+        <span data-placeid=${place.id} class="showreviews ${place.id}" style="margin-left: 177px">show</span>
           <ul class="reviewitems" id="${place.id}">
           </ul>
        </div>

@@ -14,10 +14,10 @@ $(function () {
     success: function (data, textStatus) {
       console.log(data.status);
       if (data.status === 'OK') {
-        $('#api_status').addClass('available') 
+        $('#api_status').addClass('available');
       } else {
-        $('#api_status').removeClass('available') 
+        $('#api_status').removeClass('available');
       }
     }
-  })
-})
+  });
+});
