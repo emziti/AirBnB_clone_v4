@@ -42,24 +42,15 @@ $(function () {
     const names = Object.values(amenityIds);
     $('.amenities h4').text(names.join(', '));
   });
-  $('.filters button').click(function (event) {
-    $.ajax({
-      url: 'http://0.0.0.0:5001/api/v1/places_search',
-      type: 'POST',
-      contentType: 'application/json',
-      dataType: 'JSON',
-      data: JSON.stringify({ amenities: Object.keys(amenityIds), states: Object.keys(stateIds), cities: Object.keys(cityIds) }),
-      success: function (data) {
-        let i;
-        let newHTML = [];
-        for (i = 0; i < data.length; i++) {
-          newHTML.push(createHTML(data[i]));
-        }
-        newHTML = newHTML.join('');
-        $('section.places > article').remove();
-        $('section.places').append(newHTML);
-      }
-    });
+
+  $('.filters button').click(function () {
+    const filters = JSON.stringify(
+      {
+        amenities: Object.keys(amenityIds),
+        states: Object.keys(stateIds),
+        cities: Object.keys(cityIds)
+      })
+    renderPlaces(filters)
   });
 
   $.ajax({
@@ -73,47 +64,31 @@ $(function () {
       }
     }
   });
-  $.ajax({
-    url: 'http://0.0.0.0:5001/api/v1/places_search',
-    type: 'POST',
-    contentType: 'application/json',
-    data: '{}',
-    success: function (data) {
-      let i;
-      for (i = 0; i < data.length; i++) {
-        $('section.places').append(createHTML(data[i]));
-      }
-      renderReviews();
-    }
-  });
-  function generateReview (review, fullName) {
-    return (
-      `<li>
-          <h3>From ${fullName} on ${review.created_at}</h3>
-        <p>${review.text}</p>
-      </li>`
-    )
-  }
 
   function generateReviewHTML (review) {
-
     window.fetch(`http://0.0.0.0:5001/api/v1/users/${review.user_id}`)
       .then((res) => res.json())
       .then((data) => `${data.first_name} ${data.last_name}`)
-      .then((fullName) => generateReview(review, fullName))
+      .then((fullName) => {
+        return (
+        `<li>
+          <h3>From ${fullName} on ${review.created_at}</h3>
+          <p>${review.text}</p>
+        </li>`
+        )
+      })
       .then((genReview) => ($(`#${review.place_id}`).append(genReview)))
   }
-  
+
   function renderReviews () {
+    $('.showreviews').off('click')
     $('.showreviews').click(function (event) {
       const placeId = this.dataset.placeid;
       if ($(`.${placeId}`).text() === 'hide') {
         $(`.${placeId}`).text('show')
         $(`#${placeId} > li`).remove();
       } else {
-        let rendHTML = ['hello']
         $(`.${placeId}`).text('hide')
-        // $(`#${placeId} > li`).remove();
         window.fetch(`http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`)
           .then((response) => response.json())
           .then((data) => {
@@ -124,7 +99,29 @@ $(function () {
       };
     });
   }
-  
+
+  function renderPlaces (filters='{}') {
+    $('section.places > article').remove()
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: filters
+    }
+    window.fetch('http://0.0.0.0:5001/api/v1/places_search', options)
+      .then((res) => res.json())
+      .then((data) => {
+        let i;
+        for (i = 0; i < data.length; i++) {
+          $('section.places').append(createHTML(data[i]));
+        }
+      })
+      .then(() => renderReviews())
+  }
+
+  renderPlaces();
+
   function createHTML (place) {
     return (
       `<article>
@@ -183,6 +180,4 @@ $(function () {
        </div>
       </article>`);
   }
-
-  
 });
