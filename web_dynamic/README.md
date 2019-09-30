@@ -1,4 +1,4 @@
-#AirBnB Clone: Web dynamic
+# AirBnB Clone: Web dynamic
 ## Description
 This directory contains Python scripts, Javascript scripts, static files, and templates for running the dynamic Hbnb application.
 
