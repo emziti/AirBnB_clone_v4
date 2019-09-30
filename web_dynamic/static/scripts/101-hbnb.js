@@ -11,6 +11,7 @@ $(function () {
     stateNames = (names.join(', '));
     updateH4();
   });
+
   const cityIds = {};
   let cityNames = '';
   $('.cities input').change(function (event) {
@@ -23,6 +24,7 @@ $(function () {
     cityNames = names.join(', ');
     updateH4();
   });
+
   function updateH4 () {
     if (stateNames.length > 0 && cityNames.length > 0) {
       $(' .locations h4').text(stateNames + ', ' + cityNames);
@@ -59,6 +61,7 @@ $(function () {
       }
     });
   });
+
   $.ajax({
     url: 'http://0.0.0.0:5001/api/v1/status/',
     success: function (data) {
@@ -83,29 +86,45 @@ $(function () {
       renderReviews();
     }
   });
-  function renderReviews() {
+  function generateReview (review, fullName) {
+    return (
+      `<li>
+          <h3>From ${fullName} on ${review.created_at}</h3>
+        <p>${review.text}</p>
+      </li>`
+    )
+  }
+
+  function generateReviewHTML (review) {
+
+    window.fetch(`http://0.0.0.0:5001/api/v1/users/${review.user_id}`)
+      .then((res) => res.json())
+      .then((data) => `${data.first_name} ${data.last_name}`)
+      .then((fullName) => generateReview(review, fullName))
+      .then((genReview) => ($(`#${review.place_id}`).append(review)))
+  }
+  
+  function renderReviews () {
     $('.showreviews').click(function (event) {
       const placeId = this.dataset.placeid;
-      console.log($(`.${placeId}`).text())
       if ($(`.${placeId}`).text() === 'hide') {
         $(`.${placeId}`).text('show')
         $(`#${placeId} > li`).remove();
       } else {
+        let rendHTML = ['hello']
         $(`.${placeId}`).text('hide')
-        $.ajax({
-          url: `http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`,
-          type: 'GET',
-          contentType: 'application/json',
-          dataType: 'JSON',
-          success: function (data) {
-            let toggled = true;
-            $(`#${placeId} > li`).remove();
-            $(`#${placeId}`).append(createReviewHTML(data));
-          }
-        })
+        // $(`#${placeId} > li`).remove();
+        window.fetch(`http://0.0.0.0:5001/api/v1/places/${placeId}/reviews`)
+          .then((response) => response.json())
+          .then((data) => {
+            data.forEach(review => {
+              generateReviewHTML(review)
+            })
+          })
       };
     });
   }
+  
   function createHTML (place) {
     return (
       `<article>
@@ -164,37 +183,6 @@ $(function () {
        </div>
       </article>`);
   }
-  function getUserName(review, userId) {
-    $.ajax({
-      url: `http://0.0.0.0:5001/api/v1/users/${userId}`,
-      type: 'GET',
-      contentType: 'application/json',
-      dataType: 'JSON',
-      success: function (data) {
-        const fullName = `${data.first_name} ${data.last_name}`
-        console.log(fullName)
-        return (generateReview(review, fullName))
-      }
-    })
-  }
 
-  function generateReview (review, fullName) {
-    return (
-      `<li>
-          <h3>From ${fullName} on ${review.created_at}</h3>
-        <p>${review.text}</p>
-      </li>`
-    )
-  }
-
-  function createReviewHTML (data) {
-    const retHtmlList = []
-    console.log(data)
-    data.forEach(review => {
-      retHtmlList.push(getUserName(review, review.user_id))
-      console.log('1')
-    })
-    const retHTML = retHtmlList.join('');
-    return (retHTML);
-  }
+  
 });
