@@ -10,5 +10,5 @@ This directory contains Python scripts, Javascript scripts, static files, and te
 * __python style: PEP 8 (v. 1.7.0)
 * __web static style: W3C Validator
 
-License
+## License
 MIT License
